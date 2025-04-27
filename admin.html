@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Administrador de Pedidos</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .pedido {
+        padding: 10px;
+        border: 1px solid #ddd;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        position: relative;
+      }
+      .eliminar {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: red;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 5px 10px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Panel del Administrador</h1>
+    <div id="listaPedidos"></div>
+
+    <script>
+      function cargarPedidos() {
+        const listaPedidos = document.getElementById("listaPedidos");
+        listaPedidos.innerHTML = "";
+
+        // Obtenemos todas las claves que empiecen con "pedido"
+        const claves = Object.keys(localStorage).filter((clave) =>
+          clave.startsWith("pedido")
+        );
+
+        // Ordenamos por número de pedido
+        claves.sort((a, b) => {
+          const numA = parseInt(a.replace("pedido", ""));
+          const numB = parseInt(b.replace("pedido", ""));
+          return numA - numB;
+        });
+
+        for (const clave of claves) {
+          const pedidoStr = localStorage.getItem(clave);
+          if (pedidoStr) {
+            const pedido = JSON.parse(pedidoStr);
+            const html = `
+            <div class="pedido">
+              <button class="eliminar" onclick="eliminarPedido('${clave}')">Eliminar</button>
+              <strong>Pedido #${pedido.numero}</strong><br>
+              Cliente: ${pedido.nombre} ${pedido.apellido}<br>
+              Sabor: ${pedido.sabor}<br>
+              Bolas: ${pedido.bolas}<br>
+              Topping gratis: ${pedido.toppingGratis}<br>
+              Toppings adicionales: ${
+                pedido.adicionales.length
+                  ? pedido.adicionales.join(", ")
+                  : "Ninguno"
+              }<br>
+              Método de pago: ${pedido.metodoPago}<br>
+              <strong>Total a pagar:</strong> $${pedido.total}
+            </div>
+          `;
+            listaPedidos.innerHTML += html;
+          }
+        }
+      }
+
+      function eliminarPedido(clave) {
+        if (confirm("¿Estás seguro de eliminar este pedido?")) {
+          localStorage.removeItem(clave);
+          cargarPedidos(); // recargar lista
+        }
+      }
+
+      // Carga inicial y actualización automática
+      cargarPedidos();
+      setInterval(cargarPedidos, 2000);
+    </script>
+  </body>
+</html>

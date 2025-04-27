@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pedidos de Helado</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .inicio,
+      .cliente,
+      .admin {
+        display: none;
+      }
+      .activo {
+        display: block;
+      }
+      .botones-inicio button {
+        padding: 10px 20px;
+        margin: 10px;
+        font-size: 16px;
+      }
+      .formulario {
+        display: flex;
+        gap: 20px;
+      }
+      .seccion {
+        flex: 2;
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 10px;
+      }
+      .resumen {
+        flex: 1;
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+      }
+      .sabores img,
+      .toppings-adicionales img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-right: 10px;
+      }
+      .sabores label,
+      .toppings-adicionales label {
+        display: inline-block;
+        margin-right: 15px;
+        text-align: center;
+      }
+      #qrImagen {
+        display: none;
+        margin-top: 10px;
+      }
+      #mensajePago {
+        font-weight: bold;
+        color: green;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="inicio activo" id="inicio">
+      <h1>Bienvenido a la Heladería</h1>
+      <div class="botones-inicio">
+        <button onclick="mostrarCliente()">Soy Cliente</button>
+        <button onclick="mostrarAdminLogin()">Soy Administrador</button>
+      </div>
+    </div>
+
+    <div class="cliente" id="cliente">
+      <div class="formulario">
+        <div class="seccion">
+          <h2>Formulario de Pedido</h2>
+          <form id="pedidoForm">
+            <label>Nombre: <input type="text" id="nombre" required /></label>
+            <label
+              >Apellido: <input type="text" id="apellido" required
+            /></label>
+
+            <label>Sabor de helado:</label>
+            <div class="sabores">
+              <label
+                ><input
+                  type="radio"
+                  name="sabor"
+                  value="Vainilla"
+                  required
+                /><br /><img
+                  src="vainilla.jpg"
+                  alt="Vainilla"
+                /><br />Vainilla</label
+              >
+              <label
+                ><input type="radio" name="sabor" value="Chocolate" /><br /><img
+                  src="chocolate.jpg"
+                  alt="Chocolate"
+                /><br />Chocolate</label
+              >
+              <label
+                ><input type="radio" name="sabor" value="Fresa" /><br /><img
+                  src="fresa.jpg"
+                  alt="Fresa"
+                /><br />Fresa</label
+              >
+              <label
+                ><input type="radio" name="sabor" value="Oreo" /><br /><img
+                  src="oreo.jpg"
+                  alt="Oreo"
+                /><br />Oreo</label
+              >
+            </div>
+
+            <label>Cantidad de bolas:</label>
+            <input type="number" id="bolas" min="1" max="3" required />
+
+            <label>Topping gratis:</label>
+            <select id="toppingGratis" required>
+              <option value="Chispas">Chispas</option>
+              <option value="Sirope">Sirope</option>
+              <option value="Galleta">Galleta</option>
+              <option value="Frutas">Frutas</option>
+            </select>
+
+            <div class="toppings-adicionales">
+              <p>Toppings adicionales ($1.000 cada uno):</p>
+              <label
+                ><input type="checkbox" value="Chispas" /> <br /><img
+                  src="chispas.jpg"
+                  alt="Chispas"
+                />Chispas</label
+              >
+              <label
+                ><input type="checkbox" value="Sirope" /> <br /><img
+                  src="sirope.jpg"
+                  alt="Sirope"
+                />Sirope</label
+              >
+              <label
+                ><input type="checkbox" value="Galleta" /> <br /><img
+                  src="galleta.jpg"
+                  alt="Galleta"
+                />Galleta</label
+              >
+              <label
+                ><input type="checkbox" value="Frutas" /> <br /><img
+                  src="frutas.jpg"
+                  alt="Frutas"
+                />Frutas</label
+              >
+            </div>
+
+            <p>Método de pago:</p>
+            <button type="button" onclick="seleccionarPago('efectivo')">
+              Efectivo
+            </button>
+            <button type="button" onclick="seleccionarPago('nequi')">
+              Nequi
+            </button>
+
+            <div id="mensajePago"></div>
+            <img
+              id="qrImagen"
+              src="qr-nequi-ejemplo.png"
+              width="200"
+              alt="QR Nequi"
+            />
+
+            <button type="submit">Confirmar Pedido</button>
+          </form>
+        </div>
+
+        <div class="resumen">
+          <h2>Resumen del Pedido</h2>
+          <div id="resumenPedido"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin" id="adminLogin">
+      <h2>Acceso Administrador</h2>
+      <input type="password" id="codigoAdmin" placeholder="Ingrese código" />
+      <button onclick="verificarAdmin()">Ingresar</button>
+      <p id="errorCodigo" style="color: red"></p>
+    </div>
+
+    <div class="admin" id="panelAdmin">
+      <h2>Pedidos del Personal</h2>
+      <div id="listaPedidos"></div>
+    </div>
+
+    <script>
+      let contadorPedido = 1;
+
+      function mostrarCliente() {
+        document.getElementById("inicio").classList.remove("activo");
+        document.getElementById("cliente").classList.add("activo");
+      }
+
+      function mostrarAdminLogin() {
+        document.getElementById("inicio").classList.remove("activo");
+        document.getElementById("adminLogin").classList.add("activo");
+      }
+
+      function verificarAdmin() {
+        const codigo = document.getElementById("codigoAdmin").value;
+        if (codigo === "123456") {
+          document.getElementById("adminLogin").classList.remove("activo");
+          document.getElementById("panelAdmin").classList.add("activo");
+        } else {
+          document.getElementById("errorCodigo").textContent =
+            "Código incorrecto";
+        }
+      }
+
+      function seleccionarPago(metodo) {
+        const mensaje = document.getElementById("mensajePago");
+        const qr = document.getElementById("qrImagen");
+        if (metodo === "efectivo") {
+          mensaje.textContent = "Por favor, dirígete a la caja para pagar.";
+          qr.style.display = "none";
+        } else {
+          mensaje.textContent =
+            "Escanea el siguiente código QR para pagar con Nequi.";
+          qr.style.display = "block";
+        }
+      }
+
+      document
+        .getElementById("pedidoForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          const nombre = document.getElementById("nombre").value;
+          const apellido = document.getElementById("apellido").value;
+          const sabor = document.querySelector(
+            "input[name='sabor']:checked"
+          ).value;
+          const bolas = document.getElementById("bolas").value;
+          const toppingGratis = document.getElementById("toppingGratis").value;
+          const adicionales = Array.from(
+            document.querySelectorAll(".toppings-adicionales input:checked")
+          ).map((cb) => cb.value);
+
+          const pedidoHTML = `
+        <div class="pedido">
+          <strong>Pedido #${contadorPedido++}</strong><br>
+          Cliente: ${nombre} ${apellido}<br>
+          Sabor: ${sabor}<br>
+          Bolas: ${bolas}<br>
+          Topping gratis: ${toppingGratis}<br>
+          Toppings adicionales: ${
+            adicionales.length ? adicionales.join(", ") : "Ninguno"
+          }
+        </div>
+      `;
+
+          document.getElementById("resumenPedido").innerHTML = pedidoHTML;
+          document.getElementById("listaPedidos").innerHTML += pedidoHTML;
+          document.getElementById("pedidoForm").reset();
+          document.getElementById("mensajePago").textContent = "";
+          document.getElementById("qrImagen").style.display = "none";
+        });
+    </script>
+  </body>
+</html>
